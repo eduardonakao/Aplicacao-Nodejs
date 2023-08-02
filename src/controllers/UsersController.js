@@ -13,7 +13,7 @@ class UsersController {
         }
 
         if(!name || !email || !password) {
-            throw new AppError("Digite um nome e email")
+            throw new AppError("Digite um nome, email e senha")
         }
 
         const hashedPassword = await hash(password, 8)
@@ -33,7 +33,7 @@ class UsersController {
 
         if(!user) {
             throw new AppError("Usuário não encontrado")
-    }
+        }
 
         const userWithUpdatedEmail = await database.get("SELECT * FROM users WHERE email = (?)", [email])
 
@@ -41,8 +41,8 @@ class UsersController {
             throw new AppError("Email já cadastrado")
         }
 
-        user.name = name
-        user.email = email
+        user.name = name ?? user.name
+        user.email = email ?? user.email
 
         if(password && !old_password) {
             throw new AppError("você precisa informar a senha antiga")
@@ -70,9 +70,9 @@ class UsersController {
             name = ?,
             email = ?,
             password = ?,
-            updated_at = ?
+            updated_at = DATETIME('now')
             WHERE id = ?`,
-            [user.name, user.email, user.password, new Date(), id]
+            [user.name, user.email, user.password, id]
             )
 
             return res.json()
